@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Study Notes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('start_assessment') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('student_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_performance') }}">
+                        <i class="fas fa-chart-bar"></i> Performance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chats') }}">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="{{ url_for('student_live_sessions') }}">
+                        <i class="fas fa-video"></i> Live Sessions
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4"><i class="fas fa-book"></i> Study Notes</h2>
+
+            <!-- Recommended Notes -->
+            {% if recommended_notes %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-star"></i> Recommended For You (Based on Weak Topics)
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for note in recommended_notes %}
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ note.title }}</h5>
+                                    <p class="mb-2">
+                                        <span class="badge bg-info">{{ note.topic }}</span>
+                                        <span class="badge bg-secondary">{{ note.difficulty }}</span>
+                                    </p>
+                                    <p class="card-text">{{ note.content }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ note.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- All Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list"></i> All Study Notes
+                </div>
+                <div class="card-body">
+                    {% if notes %}
+                    <div class="row g-3">
+                        {% for note in notes %}
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ note.title }}</h5>
+                                    <p class="mb-2">
+                                        <span class="badge bg-info">{{ note.topic }}</span>
+                                        <span class="badge bg-secondary">{{ note.difficulty }}</span>
+                                    </p>
+                                    <p class="card-text">{{ note.content }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ note.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No study notes available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

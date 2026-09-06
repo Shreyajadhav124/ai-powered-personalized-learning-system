@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Join Live Session{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header"><i class="fas fa-chalkboard-teacher"></i> Live Session</div>
+        <div class="card-body p-0">
+            <iframe
+                allow="camera; microphone; fullscreen; display-capture"
+                src="https://meet.jit.si/{{ room_name }}"
+                style="width:100%; height:80vh; border:0; border-radius:10px;"
+            ></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}

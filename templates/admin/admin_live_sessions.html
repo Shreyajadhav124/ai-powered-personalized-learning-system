@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Manage Live Sessions{% endblock %}
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('manage_assessment_questions') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_quiz_questions') }}">
+                        <i class="fas fa-question-circle"></i> Quiz Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('view_students') }}">
+                        <i class="fas fa-users"></i> Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_analytics') }}">
+                        <i class="fas fa-chart-pie"></i> Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_live_sessions') }}">
+                        <i class="fas fa-chart-pie"></i> Live Sessions
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-video"></i> Create Live Session</div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Topic</label>
+                            <input type="text" name="topic" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time</label>
+                            <input type="time" name="time" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="description" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Create Session</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header"><i class="fas fa-list"></i> Scheduled Sessions</div>
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Topic</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Join</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in sessions %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ s.topic }}</td>
+                                <td>{{ s.date }}</td>
+                                <td>{{ s.time}}</td>
+                                <td>
+                                    {% if s.join_available %}
+                                    <a href="{{ s.meeting_link }}" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-sign-in-alt"></i> Join Now
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-outline-secondary btn-sm" disabled>Not Started</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-center">No sessions found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

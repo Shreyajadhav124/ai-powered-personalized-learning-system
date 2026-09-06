@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI Learning System{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <section class="hero-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 100px 0; color: white;">
+        <div class="container text-center">
+            <h1 class="display-3 fw-bold mb-4">
+                <i class="fas fa-graduation-cap"></i> Welcome to AI Learning System
+            </h1>
+            <p class="lead mb-5">Personalized learning powered by Artificial Intelligence</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5">
+                    <i class="fas fa-user-plus"></i> Get Started
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Why Choose Us?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-robot fa-3x" style="color: #4f46e5;"></i>
+                            </div>
+                            <h5 class="card-title">AI-Powered Assessment</h5>
+                            <p class="card-text">Our AI analyzes your performance and classifies your learning style - Fast, Average, or Slow learner.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-3x" style="color: #10b981;"></i>
+                            </div>
+                            <h5 class="card-title">Personalized Recommendations</h5>
+                            <p class="card-text">Get customized quiz and study material recommendations based on your weak topics.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-trophy fa-3x" style="color: #f59e0b;"></i>
+                            </div>
+                            <h5 class="card-title">Track Your Progress</h5>
+                            <p class="card-text">Monitor your improvement with detailed analytics and performance graphs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-5" style="background-color: #f9fafb;">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <h3 class="m-0">1</h3>
+                        </div>
+                        <h5>Register</h5>
+                        <p>Create your account as a student or admin</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <h3 class="m-0">2</h3>
+                        </div>
+                        <h5>Take Assessment</h5>
+                        <p>Complete an initial assessment test</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <h3 class="m-0">3</h3>
+                        </div>
+                        <h5>Get Classified</h5>
+                        <p>AI determines your learning style</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <h3 class="m-0">4</h3>
+                        </div>
+                        <h5>Learn & Improve</h5>
+                        <p>Take personalized quizzes and track progress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 text-center">
+        <div class="container">
+            <h2 class="mb-4">Ready to Start Your Learning Journey?</h2>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5">
+                <i class="fas fa-rocket"></i> Join Now
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

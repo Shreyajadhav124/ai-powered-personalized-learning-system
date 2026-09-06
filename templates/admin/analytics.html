@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_assessment_questions') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_quiz_questions') }}">
+                        <i class="fas fa-question-circle"></i> Quiz Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('view_students') }}">
+                        <i class="fas fa-users"></i> Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('admin_analytics') }}">
+                        <i class="fas fa-chart-pie"></i> Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_live_sessions') }}">
+                        <i class="fas fa-chart-pie"></i> Live Sessions
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4"><i class="fas fa-chart-line"></i> Platform Analytics</h2>
+
+            <!-- Summary Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card primary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Total Students</h6>
+                                <h2 class="mb-0">{{ students|length }}</h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card success">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Assessed Students</h6>
+                                <h2 class="mb-0">{{ students|selectattr('learner_type')|list|length }}</h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Avg Performance</h6>
+                                <h2 class="mb-0">
+                                    {% set total_score = namespace(value=0) %}
+                                    {% set count = namespace(value=0) %}
+                                    {% for student in students %}
+                                        {% for attempt in student.quiz_attempts %}
+                                            {% set total_score.value = total_score.value + attempt.score %}
+                                            {% set count.value = count.value + 1 %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% if count.value > 0 %}
+                                        {{ "%.0f"|format(total_score.value / count.value) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card danger">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Total Quizzes Taken</h6>
+                                <h2 class="mb-0">
+                                    {% set total_quizzes = namespace(value=0) %}
+                                    {% for student in students %}
+                                        {% set total_quizzes.value = total_quizzes.value + student.quiz_attempts|length %}
+                                    {% endfor %}
+                                    {{ total_quizzes.value }}
+                                </h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-bar"></i> Topic-wise Average Performance
+                        </div>
+                        <div class="card-body">
+                            <canvas id="topicPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic Performance Table -->
+            {% if topic_averages %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table"></i> Detailed Topic Analysis
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Topic</th>
+                                    <th>Average Score</th>
+                                    <th>Performance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for topic, avg_score in topic_averages.items() %}
+                                <tr>
+                                    <td><strong>{{ topic }}</strong></td>
+                                    <td>{{ "%.1f"|format(avg_score) }}%</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-{{ 'success' if avg_score >= 70 else ('warning' if avg_score >= 50 else 'danger') }}" 
+                                                 style="width: {{ avg_score }}%"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if avg_score >= 70 %}
+                                            <span class="badge bg-success">Strong</span>
+                                        {% elif avg_score >= 50 %}
+                                            <span class="badge bg-warning">Moderate</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Needs Attention</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Student Performance Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i> Student Performance Summary
+                </div>
+                <div class="card-body">
+                    {% if students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Learner Type</th>
+                                    <th>Assessments</th>
+                                    <th>Quizzes Taken</th>
+                                    <th>Avg Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.name }}</td>
+                                    <td>
+                                        {% if student.learner_type %}
+                                            <span class="learner-badge {{ student.learner_type }}">
+                                                {{ student.learner_type|upper }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ student.assessments|length }}</td>
+                                    <td>{{ student.quiz_attempts|length }}</td>
+                                    <td>
+                                        {% if student.quiz_attempts %}
+                                            {% set avg = student.quiz_attempts|sum(attribute='score') / student.quiz_attempts|length %}
+                                            <strong class="text-{{ 'success' if avg >= 70 else ('warning' if avg >= 50 else 'danger') }}">
+                                                {{ "%.1f"|format(avg) }}%
+                                            </strong>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No student data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Topic Performance Chart
+const topicLabels = {{ topic_averages.keys()|list|tojson }};
+const topicScores = {{ topic_averages.values()|list|tojson }};
+
+const topicCtx = document.getElementById('topicPerformanceChart');
+if (topicCtx && topicLabels.length > 0) {
+    new Chart(topicCtx, {
+        type: 'bar',
+        data: {
+            labels: topicLabels,
+            datasets: [{
+                label: 'Average Score (%)',
+                data: topicScores,
+                backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

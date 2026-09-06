@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Initial Assessment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .question-card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+    
+    .option-label {
+        display: block;
+        padding: 15px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .option-label:hover {
+        border-color: #4f46e5;
+        background-color: #eef2ff;
+    }
+    
+    .option-label input[type="radio"]:checked + span {
+        color: #4f46e5;
+        font-weight: 600;
+    }
+    
+    .option-label input[type="radio"]:checked ~ .check-icon {
+        display: inline-block;
+    }
+    
+    .check-icon {
+        display: none;
+        float: right;
+        color: #4f46e5;
+    }
+    
+    .progress-indicator {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="alert alert-info">
+                <h4><i class="fas fa-info-circle"></i> Initial Assessment</h4>
+                <p class="mb-0">This assessment will help us understand your learning style. Answer all questions honestly. Time taken will be considered in the analysis.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('submit_assessment') }}" id="assessmentForm">
+                {% for question in questions %}
+                <div class="question-card">
+                    <h5 class="mb-3">
+                        <span class="badge bg-primary">Q{{ loop.index }}</span>
+                        {{ question.question_text }}
+                    </h5>
+                    <p class="text-muted small mb-3">
+                        <span class="badge bg-info">{{ question.topic }}</span>
+                        <span class="badge bg-secondary">{{ question.difficulty }}</span>
+                    </p>
+                    
+                    <input type="hidden" name="question_ids" value="{{ question.id }}">
+                    
+                    <label class="option-label">
+                        <input type="radio" name="answer_{{ question.id }}" value="A" required>
+                        <span>A. {{ question.option_a }}</span>
+                        <i class="fas fa-check-circle check-icon"></i>
+                    </label>
+                    
+                    <label class="option-label">
+                        <input type="radio" name="answer_{{ question.id }}" value="B" required>
+                        <span>B. {{ question.option_b }}</span>
+                        <i class="fas fa-check-circle check-icon"></i>
+                    </label>
+                    
+                    <label class="option-label">
+                        <input type="radio" name="answer_{{ question.id }}" value="C" required>
+                        <span>C. {{ question.option_c }}</span>
+                        <i class="fas fa-check-circle check-icon"></i>
+                    </label>
+                    
+                    <label class="option-label">
+                        <input type="radio" name="answer_{{ question.id }}" value="D" required>
+                        <span>D. {{ question.option_d }}</span>
+                        <i class="fas fa-check-circle check-icon"></i>
+                    </label>
+                </div>
+                {% endfor %}
+
+                <div class="text-center mb-5">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-check"></i> Submit Assessment
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-3">
+            <div class="progress-indicator">
+                <h6><i class="fas fa-list-check"></i> Progress</h6>
+                <p class="mb-2">Questions: <strong id="answered">0</strong> / {{ questions|length }}</p>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <hr>
+                <p class="small text-muted mb-0">
+                    <i class="fas fa-clock"></i> Time: <strong id="timer">00:00</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const totalQuestions = {{ questions|length }};
+    let startTime = new Date().getTime();
+    
+    // Timer
+    setInterval(() => {
+        const elapsed = Math.floor((new Date().getTime() - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+    }, 1000);
+    
+    // Progress tracker
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const answeredQuestions = new Set();
+            document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                const questionId = input.name;
+                answeredQuestions.add(questionId);
+            });
+            
+            const count = answeredQuestions.size;
+            const percentage = (count / totalQuestions) * 100;
+            
+            document.getElementById('answered').textContent = count;
+            document.getElementById('progressBar').style.width = percentage + '%';
+        });
+    });
+</script>
+{% endblock %}

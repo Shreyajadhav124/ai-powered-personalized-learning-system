@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('start_assessment') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('student_performance') }}">
+                        <i class="fas fa-chart-bar"></i> Performance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chats') }}">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('student_live_sessions') }}">
+                        <i class="fas fa-video"></i> Live Sessions
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4"><i class="fas fa-chart-line"></i> Performance Tracker</h2>
+
+            <!-- Learner Profile -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-graduate"></i> Your Learning Profile
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Learner Type</h5>
+                            {% if student.learner_type %}
+                            <span class="learner-badge {{ student.learner_type }} fs-4">
+                                {{ student.learner_type|upper }} LEARNER
+                            </span>
+                            {% else %}
+                            <p class="text-muted">Complete assessment to get classified</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Member Since</h5>
+                            <p class="fs-5"><i class="fas fa-calendar"></i> {{ student.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Charts -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i> Quiz Performance Over Time
+                        </div>
+                        <div class="card-body">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-pie"></i> Topic-wise Performance
+                        </div>
+                        <div class="card-body">
+                            <canvas id="topicChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz History -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-history"></i> Quiz History
+                </div>
+                <div class="card-body">
+                    {% if quiz_attempts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Topic</th>
+                                    <th>Difficulty</th>
+                                    <th>Score</th>
+                                    <th>Questions</th>
+                                    <th>Time Taken</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for quiz in quiz_attempts %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ quiz.topic }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if quiz.difficulty == 'easy' else ('warning' if quiz.difficulty == 'medium' else 'danger') }}">
+                                            {{ quiz.difficulty }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-{{ 'success' if quiz.score >= 70 else ('warning' if quiz.score >= 50 else 'danger') }}">
+                                            {{ "%.1f"|format(quiz.score) }}%
+                                        </strong>
+                                    </td>
+                                    <td>{{ quiz.total_questions }}</td>
+                                    <td>
+                                        {% if quiz.time_taken %}
+                                            {{ quiz.time_taken // 60 }}m {{ quiz.time_taken % 60 }}s
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ quiz.completed_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if quiz.score >= 70 %}
+                                            <span class="badge bg-success">Excellent</span>
+                                        {% elif quiz.score >= 50 %}
+                                            <span class="badge bg-warning">Good</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Need Improvement</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No quiz attempts yet. Start practicing!</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Assessment Results -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-check"></i> Assessment Results
+                </div>
+                <div class="card-body">
+                    {% if assessments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Score</th>
+                                    <th>Total Questions</th>
+                                    <th>Time Taken</th>
+                                    <th>Date</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assessment in assessments %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <strong class="text-{{ 'success' if assessment.score >= 70 else ('warning' if assessment.score >= 50 else 'danger') }}">
+                                            {{ "%.1f"|format(assessment.score) }}%
+                                        </strong>
+                                    </td>
+                                    <td>{{ assessment.total_questions }}</td>
+                                    <td>{{ assessment.time_taken // 60 }}m {{ assessment.time_taken % 60 }}s</td>
+                                    <td>{{ assessment.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if assessment.score >= 70 else ('warning' if assessment.score >= 50 else 'danger') }}">
+                                            {{ "Pass" if assessment.score >= 50 else "Fail" }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No assessments completed yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Performance Chart
+const performanceData = {
+    labels: [{% for quiz in quiz_attempts %}'{{ quiz.completed_at.strftime("%m/%d") }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+    datasets: [{
+        label: 'Quiz Scores',
+        data: [{% for quiz in quiz_attempts %}{{ quiz.score }}{% if not loop.last %}, {% endif %}{% endfor %}],
+        borderColor: 'rgb(79, 70, 229)',
+        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+        tension: 0.4,
+        fill: true
+    }]
+};
+
+const performanceCtx = document.getElementById('performanceChart');
+if (performanceCtx) {
+    new Chart(performanceCtx, {
+        type: 'line',
+        data: performanceData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+// Topic Chart
+const topicData = {};
+{% for quiz in quiz_attempts %}
+if (!topicData['{{ quiz.topic }}']) {
+    topicData['{{ quiz.topic }}'] = [];
+}
+topicData['{{ quiz.topic }}'].push({{ quiz.score }});
+{% endfor %}
+
+const topicAverages = {};
+for (const topic in topicData) {
+    const avg = topicData[topic].reduce((a, b) => a + b, 0) / topicData[topic].length;
+    topicAverages[topic] = avg;
+}
+
+const topicChartData = {
+    labels: Object.keys(topicAverages),
+    datasets: [{
+        label: 'Average Score by Topic',
+        data: Object.values(topicAverages),
+        backgroundColor: [
+            'rgba(79, 70, 229, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(239, 68, 68, 0.8)',
+            'rgba(124, 58, 237, 0.8)'
+        ]
+    }]
+};
+
+const topicCtx = document.getElementById('topicChart');
+if (topicCtx) {
+    new Chart(topicCtx, {
+        type: 'doughnut',
+        data: topicChartData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

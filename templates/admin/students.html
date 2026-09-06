@@ -1,0 +1,106 @@
+<!-- templates/admin/students.html -->
+{% extends "base.html" %}
+
+{% block title %}View Students{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_assessment_questions') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_quiz_questions') }}">
+                        <i class="fas fa-question-circle"></i> Quiz Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('view_students') }}">
+                        <i class="fas fa-users"></i> Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_analytics') }}">
+                        <i class="fas fa-chart-pie"></i> Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_live_sessions') }}">
+                        <i class="fas fa-chart-pie"></i> Live Sessions
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4"><i class="fas fa-users"></i> All Students</h2>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list"></i> Student List ({{ students|length }})
+                </div>
+                <div class="card-body">
+                    {% if students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Learner Type</th>
+                                    <th>Joined Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <i class="fas fa-user-circle"></i> {{ student.name }}
+                                    </td>
+                                    <td>{{ student.email }}</td>
+                                    <td>
+                                        {% if student.learner_type %}
+                                            <span class="learner-badge {{ student.learner_type }}">
+                                                {{ student.learner_type|upper }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Assessed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ student.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No students registered yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

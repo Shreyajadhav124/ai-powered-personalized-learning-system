@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('student_dashboard') }}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('start_assessment') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_performance') }}">
+                        <i class="fas fa-chart-bar"></i> Performance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chats') }}">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_live_sessions') }}">
+                        <i class="fas fa-robot"></i> Live Sessions
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Welcome, {{ student.name }}! <i class="fas fa-wave-hand"></i></h2>
+
+            <!-- Learner Type Badge -->
+            {% if student.learner_type %}
+            <div class="alert alert-info">
+                <h5><i class="fas fa-brain"></i> Your Learning Profile</h5>
+                <p class="mb-0">
+                    You are classified as a 
+                    <span class="learner-badge {{ student.learner_type }}">
+                        {{ student.learner_type|upper }} LEARNER
+                    </span>
+                </p>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle"></i> Assessment Required</h5>
+                <p class="mb-0">Please complete the initial assessment to get personalized recommendations.</p>
+                <a href="{{ url_for('start_assessment') }}" class="btn btn-primary mt-2">
+                    <i class="fas fa-play"></i> Start Assessment
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Stats Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card primary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Assessments</h6>
+                                <h3 class="mb-0">{{ assessments|length }}</h3>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card success">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Quizzes Taken</h6>
+                                <h3 class="mb-0">{{ quizzes|length }}</h3>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Avg Score</h6>
+                                <h3 class="mb-0">
+                                    {% if quizzes %}
+                                        {{ "%.1f"|format(quizzes|sum(attribute='score')/quizzes|length) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </h3>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card danger">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Study Notes</h6>
+                                <h3 class="mb-0">{{ recommended_notes|length }}</h3>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Quizzes -->
+            {% if recommended_quizzes %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-robot"></i> AI Recommended Quizzes
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for quiz in recommended_quizzes %}
+                        <div class="col-md-4">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ quiz.topic }}</h5>
+                                    <p class="card-text">
+                                        <span class="badge bg-{{ 'success' if quiz.difficulty == 'easy' else ('warning' if quiz.difficulty == 'medium' else 'danger') }}">
+                                            {{ quiz.difficulty|upper }}
+                                        </span>
+                                    </p>
+                                    <p class="text-muted small">{{ quiz.reason }}</p>
+                                    <a href="{{ url_for('take_quiz', topic=quiz.topic, difficulty=quiz.difficulty) }}" 
+                                       class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-play"></i> Take Quiz
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Quiz Attempts -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-history"></i> Recent Quiz Attempts
+                </div>
+                <div class="card-body">
+                    {% if quizzes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Topic</th>
+                                    <th>Difficulty</th>
+                                    <th>Score</th>
+                                    <th>Questions</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for quiz in quizzes %}
+                                <tr>
+                                    <td>{{ quiz.topic }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if quiz.difficulty == 'easy' else ('warning' if quiz.difficulty == 'medium' else 'danger') }}">
+                                            {{ quiz.difficulty }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-{{ 'success' if quiz.score >= 70 else ('warning' if quiz.score >= 50 else 'danger') }}">
+                                            {{ "%.1f"|format(quiz.score) }}%
+                                        </strong>
+                                    </td>
+                                    <td>{{ quiz.total_questions }}</td>
+                                    <td>{{ quiz.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No quiz attempts yet. Start with the recommended quizzes above!</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recommended Notes -->
+            {% if recommended_notes %}
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-lightbulb"></i> Recommended Study Notes
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for note in recommended_notes %}
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ note.title }}</h6>
+                                    <p class="text-muted small mb-2">
+                                        <span class="badge bg-info">{{ note.topic }}</span>
+                                        <span class="badge bg-secondary">{{ note.difficulty }}</span>
+                                    </p>
+                                    <p class="card-text small">{{ note.content[:100] }}...</p>
+                                    <a href="{{ url_for('student_notes') }}" class="btn btn-sm btn-outline-primary">
+                                        View All Notes
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

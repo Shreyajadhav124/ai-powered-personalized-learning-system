@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar">
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_assessment_questions') }}">
+                        <i class="fas fa-clipboard-list"></i> Assessment Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_quiz_questions') }}">
+                        <i class="fas fa-question-circle"></i> Quiz Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_notes') }}">
+                        <i class="fas fa-book"></i> Study Notes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('view_students') }}">
+                        <i class="fas fa-users"></i> Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_analytics') }}">
+                        <i class="fas fa-chart-pie"></i> Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_live_sessions') }}">
+                        <i class="fas fa-chart-pie"></i> Live Sessions
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4"><i class="fas fa-shield-alt"></i> Admin Dashboard</h2>
+
+            <!-- Stats Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card primary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Total Students</h6>
+                                <h2 class="mb-0">{{ total_students }}</h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card success">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Assessment Questions</h6>
+                                <h2 class="mb-0">{{ total_assessments }}</h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Quiz Questions</h6>
+                                <h2 class="mb-0">{{ total_quizzes }}</h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-question"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card danger">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Study Notes</h6>
+                                <h2 class="mb-0">{{ total_notes }}</h2>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learner Distribution -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-brain"></i> Learner Type Distribution
+                        </div>
+                        <div class="card-body">
+                            <canvas id="learnerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-bar"></i> Quick Stats
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-tachometer-alt text-success"></i> Fast Learners</span>
+                                    <strong>{{ fast_learners }}</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: {{ (fast_learners / total_students * 100)|int if total_students > 0 else 0 }}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-balance-scale text-warning"></i> Average Learners</span>
+                                    <strong>{{ avg_learners }}</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-warning" style="width: {{ (avg_learners / total_students * 100)|int if total_students > 0 else 0 }}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-turtle text-danger"></i> Slow Learners</span>
+                                    <strong>{{ slow_learners }}</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: {{ (slow_learners / total_students * 100)|int if total_students > 0 else 0 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Students -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-user-clock"></i> Recent Students
+                </div>
+                <div class="card-body">
+                    {% if recent_students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Learner Type</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in recent_students %}
+                                <tr>
+                                    <td><i class="fas fa-user-circle"></i> {{ student.name }}</td>
+                                    <td>{{ student.email }}</td>
+                                    <td>
+                                        {% if student.learner_type %}
+                                            <span class="learner-badge {{ student.learner_type }}">
+                                                {{ student.learner_type|upper }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Assessed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ student.created_at.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No students yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Learner Distribution Chart
+const learnerData = {
+    labels: ['Fast Learners', 'Average Learners', 'Slow Learners', 'Not Assessed'],
+    datasets: [{
+        data: [
+            {{ fast_learners }},
+            {{ avg_learners }},
+            {{ slow_learners }},
+            {{ total_students - (fast_learners + avg_learners + slow_learners) }}
+        ],
+        backgroundColor: [
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(239, 68, 68, 0.8)',
+            'rgba(156, 163, 175, 0.8)'
+        ],
+        borderWidth: 2,
+        borderColor: '#fff'
+    }]
+};
+
+const learnerCtx = document.getElementById('learnerChart');
+if (learnerCtx) {
+    new Chart(learnerCtx, {
+        type: 'pie',
+        data: learnerData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
